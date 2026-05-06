@@ -2,15 +2,30 @@ import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {} 
+  @InjectQueue('orders-queue') private ordersQueue!: Queue;
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({
-      data: createOrderDto,
+  async create(createOrderDto: CreateOrderDto) {
+    const order = await this.prisma.order.create({
+      data: {
+        ...createOrderDto,
+      },
     });
+    await this.ordersQueue.add('process-payment', {
+      orderId: order.id,
+      productId: order.productId,
+      quantity: order.quantity,
+    });
+
+    return {
+      message: 'Pedido recebido e em processamento',
+      orderId: order.id,
+    };
   }
 
   findAll() {
