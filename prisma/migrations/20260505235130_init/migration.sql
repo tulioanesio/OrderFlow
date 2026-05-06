@@ -1,14 +1,5 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "OrderStatus" AS ENUM ('CREATED', 'STOCK_CONFIRMED', 'STOCK_FAILED', 'PAYMENT_PROCESSING', 'PAID', 'PAYMENT_FAILED', 'COMPLETED');
-
--- DropTable
-DROP TABLE "User";
 
 -- CreateTable
 CREATE TABLE "Product" (
@@ -27,7 +18,6 @@ CREATE TABLE "Order" (
     "total" DECIMAL(10,2) NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'CREATED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "totalPrice" DECIMAL(10,2) NOT NULL,
     "productId" TEXT NOT NULL,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
